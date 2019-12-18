@@ -25,7 +25,7 @@ class Channels extends Component {
 		typingRef: firebase.database().ref('typing'),
 		notifications: [],
 		modal: false,
-		firstload: true
+		firstLoad: true
 	};
 
 	componentDidMount() {
@@ -88,6 +88,9 @@ class Channels extends Component {
 
 	removeListeners = () => {
 		this.state.channelsRef.off();
+		this.state.channels.forEach(channel => {
+			this.state.messagesRef.child(channel.id).off();
+		});
 	};
 
 	setFirstChannel = () => {
@@ -119,24 +122,13 @@ class Channels extends Component {
 			.child(key)
 			.update(newChannel)
 			.then(() => {
-				this.setState({
-					channelName: '',
-					channelDetails: ''
-				});
+				this.setState({ channelName: '', channelDetails: '' });
 				this.closeModal();
 				console.log('channel added');
 			})
 			.catch(err => {
-				console.log(err);
+				console.error(err);
 			});
-	};
-
-	openModal = () => this.setState({ modal: true });
-
-	closeModal = () => this.setState({ modal: false });
-
-	handleChange = event => {
-		this.setState({ [event.target.name]: event.target.value });
 	};
 
 	handleSubmit = event => {
@@ -144,6 +136,10 @@ class Channels extends Component {
 		if (this.isFormValid(this.state)) {
 			this.addChannel();
 		}
+	};
+
+	handleChange = event => {
+		this.setState({ [event.target.name]: event.target.value });
 	};
 
 	changeChannel = channel => {
@@ -155,7 +151,6 @@ class Channels extends Component {
 		this.clearNotifications();
 		this.props.setCurrentChannel(channel);
 		this.props.setPrivateChannel(false);
-
 		this.setState({ channel });
 	};
 
@@ -178,6 +173,18 @@ class Channels extends Component {
 		this.setState({ activeChannel: channel.id });
 	};
 
+	getNotificationCount = channel => {
+		let count = 0;
+
+		this.state.notifications.forEach(notification => {
+			if (notification.id === channel.id) {
+				count = notification.count;
+			}
+		});
+
+		if (count > 0) return count;
+	};
+
 	displayChannels = channels =>
 		channels.length > 0 &&
 		channels.map(channel => (
@@ -195,20 +202,12 @@ class Channels extends Component {
 			</Menu.Item>
 		));
 
-	getNotificationCount = channel => {
-		let count = 0;
-
-		this.state.notifications.forEach(notification => {
-			if (notification.id === channel.id) {
-				count = notification.count;
-			}
-		});
-
-		if (count > 0) return count;
-	};
-
 	isFormValid = ({ channelName, channelDetails }) =>
 		channelName && channelDetails;
+
+	openModal = () => this.setState({ modal: true });
+
+	closeModal = () => this.setState({ modal: false });
 
 	render() {
 		const { channels, modal } = this.state;
@@ -218,14 +217,15 @@ class Channels extends Component {
 				<Menu.Menu className='menu'>
 					<Menu.Item>
 						<span>
-							<Icon name='exchange' />
-							CHANNELS
+							<Icon name='exchange' /> CHANNELS
 						</span>{' '}
-						({channels.length})<Icon name='add' onClick={this.openModal} />
+						({channels.length}) <Icon name='add' onClick={this.openModal} />
 					</Menu.Item>
 					{this.displayChannels(channels)}
 				</Menu.Menu>
-				<Modal basic open={modal}>
+
+				{/* Add Channel Modal */}
+				<Modal basic open={modal} onClose={this.closeModal}>
 					<Modal.Header>Add a Channel</Modal.Header>
 					<Modal.Content>
 						<Form onSubmit={this.handleSubmit}>
@@ -235,18 +235,20 @@ class Channels extends Component {
 									label='Name of Channel'
 									name='channelName'
 									onChange={this.handleChange}
-								></Input>
+								/>
 							</Form.Field>
+
 							<Form.Field>
 								<Input
 									fluid
 									label='About the Channel'
 									name='channelDetails'
 									onChange={this.handleChange}
-								></Input>
+								/>
 							</Form.Field>
 						</Form>
 					</Modal.Content>
+
 					<Modal.Actions>
 						<Button color='green' inverted onClick={this.handleSubmit}>
 							<Icon name='checkmark' /> Add
