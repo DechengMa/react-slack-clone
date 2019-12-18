@@ -7,7 +7,6 @@ const isOwnMessage = (message, user) => {
 };
 
 const isImage = message => {
-	console.log(message);
 	return message.hasOwnProperty('image') && !message.hasOwnProperty('content');
 };
 
