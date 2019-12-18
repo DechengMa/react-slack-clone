@@ -41,13 +41,11 @@ class Root extends React.Component {
 		return this.props.isLoading ? (
 			<Spinner />
 		) : (
-			<Router>
-				<Switch>
-					<Route exact path='/' component={App} />
-					<Route path='/login' component={Login} />
-					<Route path='/register' component={Register} />
-				</Switch>
-			</Router>
+			<Switch>
+				<Route exact path='/' component={App} />
+				<Route path='/login' component={Login} />
+				<Route path='/register' component={Register} />
+			</Switch>
 		);
 	}
 }

@@ -30,7 +30,7 @@ class ColorPanel extends Component {
 		}
 	}
 
-	componentWillMount() {
+	componentWillUnmount() {
 		this.removeListener();
 	}
 

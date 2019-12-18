@@ -10,7 +10,7 @@ class DirectMessages extends Component {
 		user: this.props.currentUser,
 		users: [],
 		usersRef: firebase.database().ref('users'),
-		connectRef: firebase.database().ref('.info/connected'),
+		connectedRef: firebase.database().ref('.info/connected'),
 		presenceRef: firebase.database().ref('presence')
 	};
 
@@ -42,7 +42,7 @@ class DirectMessages extends Component {
 			}
 		});
 
-		this.state.connectRef.on('value', snap => {
+		this.state.connectedRef.on('value', snap => {
 			if (snap.val() === true) {
 				const ref = this.state.presenceRef.child(currentUserUid);
 				ref.set(true);
