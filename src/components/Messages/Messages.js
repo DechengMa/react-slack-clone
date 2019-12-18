@@ -38,6 +38,16 @@ class Messages extends Component {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		if (this.messagesEnd) {
+			this.scrollToBottom();
+		}
+	}
+
+	scrollToBottom = () => {
+		this.messagesEnd.scrollIntoView({ behaviour: 'smooth' });
+	};
+
 	addListeners = channelId => {
 		this.addMessageListener(channelId);
 		this.addTypingListeners(channelId);
